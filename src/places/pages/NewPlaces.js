@@ -6,6 +6,8 @@ import {VALIDATOR_REQUIRE, VALIDATOR_MINLENGTH} from '../../shared/util/validato
 import './NewPlace.css';
 
 const formReducer = (state, action) => {
+
+    // ngubah state make reducer
     switch (action.type) {
         case 'INPUT_CHANGE':
             let formIsValid = true;
@@ -33,6 +35,8 @@ const formReducer = (state, action) => {
 };
 
 const NewPlace = () => {
+
+    // state apakah true(isValid) ato false(!isValid)
     const [formState,
         dispatch] = useReducer(formReducer, {
         inputs: {
@@ -48,12 +52,19 @@ const NewPlace = () => {
         isValid: false
     });
 
+    // fetch ke object id, data sama validation
     const inputHandler = useCallback((id, value, isValid) => {
         dispatch({type: 'INPUT_CHANGE', value: value, isValid: isValid, inputId: id});
     }, []);
 
+    // kirim ke backend
+    const placeSubmitHandler = event => {
+        event.preventDefault();
+        console.log(formState.inputs); // send this to the backend!
+    }
+
     return (
-        <form className="place-form">
+        <form className="place-form" onSubmit={placeSubmitHandler}>
             <Input
                 id="title"
                 element="input"
@@ -68,6 +79,13 @@ const NewPlace = () => {
                 label="Description"
                 validators={[VALIDATOR_MINLENGTH(5)]}
                 errorText="Please enter a valid description (at least 5 characters)."
+                onInput={inputHandler}/>
+            <Input
+                id="address"
+                element="input"
+                label="Address"
+                validators={[VALIDATOR_REQUIRE()]}
+                errorText="Please enter a valid address."
                 onInput={inputHandler}/>
             <Button type="submit" disabled={!formState.isValid}>ADD PLACE</Button>
         </form>
