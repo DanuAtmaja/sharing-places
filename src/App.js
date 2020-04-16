@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback} from 'react';
 import {BrowserRouter as Router, Route, Redirect, Switch} from 'react-router-dom'
 
 import Users from './user/pages/Users';
@@ -7,32 +7,63 @@ import UserPlaces from './places/pages/UserPlaces';
 import UpdatePlaces from  './places/pages/UpdatePlace';
 import Auth from './user/pages/Auth';
 import MainNavigation from './shared/components/Navigation/MainNavigation';
+import {AuthContext } from './shared/context/auth-context';
 
 const App = () => {
-    return (
-        <Router>
-            <MainNavigation/>
-            <main>
-                <Switch>
-                    <Route exact path="/">
-                        <Users/>
-                    </Route>
-                    <Route path="/:userId/places">
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    const login = useCallback(() => {
+        setIsLoggedIn(true)
+    },[])
+
+    const logout = useCallback(() => {
+        setIsLoggedIn(false)
+    },[])
+
+    let routes;
+
+    if(isLoggedIn) {
+        routes = (
+            <Switch>
+                <Route exact path="/">
+                    <Users/>
+                </Route>
+                <Route path="/:userId/places">
                         <UserPlaces />
-                    </Route>
-                    <Route exact path="/places/new">
-                        <NewPlace/>
-                    </Route>
-                    <Route path="/places/:placeId">
-                        <UpdatePlaces />
-                    </Route>
-                    <Route path="/auth">
-                        <Auth />
-                    </Route>
-                    <Redirect to="/"/>
-                </Switch>
-            </main>
-        </Router>
+                </Route>
+                <Route exact path="/places/new">
+                    <NewPlace/>
+                </Route>
+                <Route path="/places/:placeId">
+                    <UpdatePlaces />
+                </Route>
+                <Redirect to="/" />
+            </Switch>
+        );
+    }else {
+        routes = (
+            <Switch>
+                <Route exact path="/">
+                    <Users/>
+                </Route>
+                <Route path="/:userId/places">
+                        <UserPlaces />
+                </Route>
+                <Route path="/auth">
+                    <Auth />
+                </Route>
+                <Redirect to="/auth" />
+            </Switch>
+        );
+    }
+
+    return (
+        <AuthContext.Provider value={{isLoggedIn: isLoggedIn, login:login, logout: logout}}>
+            <Router>
+                <MainNavigation/>
+                <main>{routes}</main>
+            </Router>
+        </AuthContext.Provider>
     );
 }
 
